@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    <head>
+	<meta charset="utf-8">
+        <style>
+body{
+    background-color: black;
+    color: white;
+    font-size: 60px;
+    margin: 0;
+}
+#container{
+    background-color: blueviolet;
+    margin: auto;
+    width: 900px;
+    height: 1500px;
+}
+input{
+    margin: 0;
+    margin-right: 50px;
+    width: 450px;
+    height: 100px;
+    font-size: 60px;
+    text-align: center;
+    border: none;
+    border-radius: 30px;
+    float: right;
+}
+p{
+    margin: 0;
+    margin-left: 50px;
+    margin-right: 100px;
+    float: left;
+    text-align: right;
+    line-height: 100px;
+}
+#controls p{
+    width: 250px;
+    height: 100px;
+    margin-right: 0;
+    background-color: rgb(116, 30, 197);
+}
+#controls button{
+    width: 185px;
+    height: 75px;
+    margin: 25px;
+    margin-left: 20px;
+    margin-right: 20px;
+    float: left;
+    border-radius: 30px;
+    font-size: 50px;
+}
+.bigsection{
+    height: 500px;
+    width: 900px;
+    float: left;
+}
+.smallsection{
+    height: 125px;
+    width: 100%;
+}
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            <div id="controls" class="bigsection">
+                <div class="smallsection">
+                    <p>Time:</p>
+                    <input
+                        type="time"
+                        id="timeinput">
+                </div>
+                <div class="smallsection">
+                    <p>Length:</p>
+                    <p style="float: right; margin-right: 50px; margin-left: 0; text-align: center; width: 200px;">min</p>
+                    <input id="minuteinput" style="margin-right: 0; width: 250px;" >
+                </div>
+                <div class="smallsection">
+                    <p>Name:</p>
+                    <input id="timeinput">
+                </div>
+                <div class="smallsection">
+                    <button>Add</button>
+                    <button>Clear</button>
+                    <button>Export</button>
+                    <button>Import</button>
+                </div>
+            </div>
+            <div id="mainscreen" class="bigsection">
+hi
+            </div>
+            <div id="list" class="bigsection">
+hi
+            </div>
+        </div>
+
+     <script>
+let showInput=()=>{
+    
+    text.innerHTML = time.value
+}
+    </script>
+    </body>
+</html>
