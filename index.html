@@ -1,67 +1,90 @@
 <!DOCTYPE html>
 <html lang="en-GB">
-    <head>
-	<meta charset="utf-8">
-        <style>
-body{
-    background-color: black;
-    color: white;
-    font-size: 60px;
-    margin: 0;
-}
-#container{
-    background-color: blueviolet;
-    margin: auto;
-    width: 900px;
-    height: 1500px;
-}
-input{
-    margin: 0;
-    margin-right: 50px;
-    width: 450px;
-    height: 100px;
-    font-size: 60px;
-    text-align: center;
-    border: none;
-    border-radius: 30px;
-    float: right;
-}
-p{
-    margin: 0;
-    margin-left: 50px;
-    margin-right: 100px;
-    float: left;
-    text-align: right;
-    line-height: 100px;
-}
-#controls p{
-    width: 250px;
-    height: 100px;
-    margin-right: 0;
-    background-color: rgb(116, 30, 197);
-}
-#controls button{
-    width: 185px;
-    height: 75px;
-    margin: 25px;
-    margin-left: 20px;
-    margin-right: 20px;
-    float: left;
-    border-radius: 30px;
-    font-size: 50px;
-}
-.bigsection{
-    height: 500px;
-    width: 900px;
-    float: left;
-}
-.smallsection{
-    height: 125px;
-    width: 100%;
-}
-        </style>
-    </head>
-    <body>
+<head>
+    <meta charset="utf-8">
+    <style>
+    body{
+        background-color: black;
+        color: white;
+        font-size: 60px;
+        margin: 0;
+    }
+    #container{
+        background-color: blueviolet;
+        margin: auto;
+        width: 900px;
+        height: 1500px;
+    }
+    input{
+        margin: 0;
+        margin-right: 50px;
+        width: 450px;
+        height: 100px;
+        font-size: 60px;
+        text-align: center;
+        border: none;
+        border-radius: 30px;
+        float: right;
+    }
+    p{
+        margin: 0;
+        margin-left: 50px;
+        margin-right: 100px;
+        float: left;
+        text-align: right;
+        line-height: 100px;
+    }
+    #controls p{
+        width: 250px;
+        height: 100px;
+        margin-right: 0;
+        background-color: rgb(116, 30, 197);
+    }
+    #controls button{
+        width: 185px;
+        height: 75px;
+        margin: 25px;
+        margin-left: 20px;
+        margin-right: 20px;
+        float: left;
+        border-radius: 30px;
+        font-size: 50px;
+    }
+    .bigsection{
+        height: 500px;
+        width: 900px;
+        float: left;
+    }
+    .smallsection{
+        height: 125px;
+        width: 100%;
+    }
+    table{
+        border: 5px white solid;
+        width: 890px;
+    }
+    #mainscreen{
+        position: relative;
+    }
+    #hidebtn{
+        position: absolute;
+        right: 100px;
+        width: 100px;
+        height: 100px;
+        border-radius: 30px;
+        font-size: 50px;
+        opacity: 0.5;
+    }
+    #taskslist button{
+        width: 70px;
+        height: 70px;
+        float: left;
+        border-radius: 30px;
+        font-size: 50px;
+    }
+    </style>
+</head>
+<body>
         <div id="container">
             <div id="controls" class="bigsection">
                 <div class="smallsection">
@@ -77,28 +100,197 @@ p{
                 </div>
                 <div class="smallsection">
                     <p>Name:</p>
-                    <input id="timeinput">
+                    <input id="tasknameinput">
                 </div>
                 <div class="smallsection">
-                    <button>Add</button>
-                    <button>Clear</button>
+                    <button onclick="addTask(
+                        tasknameinput.value,
+                        Number(minuteinput.value),
+                        timeinput.value
+                        )"
+                        >Add
+                    </button>
+                    <button onclick="clearInputs()">Clear</button>
                     <button>Export</button>
                     <button>Import</button>
                 </div>
             </div>
+            <div id="message"></div>
             <div id="mainscreen" class="bigsection">
-hi
+                <button id="hidebtn" onclick="hideControls()">∧</button>
+                <div id="clockscreen" class="bigsection"></div>
             </div>
             <div id="list" class="bigsection">
-hi
+                <table id="taskslist"></table>
             </div>
         </div>
+<script>
+let nextFreeTime;
+let startTimeChosen = false
+let listItemCount;
+let currentTask = -1
+let nextTask = -1
+let intervalIsRunning = false
+let tasks = []
+let secondsRemaining;
+let controlsHidden = false;
 
-     <script>
-let showInput=()=>{
-    
-    text.innerHTML = time.value
+let addTask=(name, length, startTimeStr)=>{
+    message.innerHTML = ""
+    let nowUnixMins = Math.floor((new Date).getHours()*60+(new Date).getMinutes());
+        if(name != "" && length > 0){
+            if(!startTimeChosen){
+                let h = startTimeStr.substring(0,2)
+                let m = startTimeStr.substring(3)
+                if(h == "" || m == ""){
+                    nextFreeTime = nowUnixMins;
+                }
+                else{
+                    nextFreeTime = Number(h)*60+Number(m);
+                }
+                startTimeChosen = true
+            }
+            else{
+            nextFreeTime = tasks[tasks.length-1].endTime
+            }
+
+            let hoursStr = String(Math.floor(nextFreeTime/60)%24).padStart(2, "0")
+            let minsStr = String(nextFreeTime%60).padStart(2, "0")
+            let endHoursStr = String(Math.floor((nextFreeTime + length)/60)%24).padStart(2, "0")
+            let endMinsStr = String((nextFreeTime + length)%60).padStart(2, "0")
+            tasks.push({
+                taskName : name,
+                startTime : nextFreeTime,
+                endTime : nextFreeTime + length,
+                timeText : `${hoursStr}:${minsStr} - ${endHoursStr}:${endMinsStr}`,
+                taskNumber : listItemCount+1
+            })
+            
+            createList()
+        }
+                    
+        listItemCount++
+        searchTask()
+        updateStorage()
 }
+let createList=()=>{
+    taskslist.innerHTML = ""
+    for(let i = 0; i < tasks.length; i++){
+            taskslist.innerHTML += `<tr><td>${tasks[i].taskName}</td><td>${tasks[i].timeText}</td><td><button onclick="deleteTask(${tasks[i].taskNumber})">x</botton></td></tr>`
+    }
+}
+let clearInputs=()=>{
+    tasknameinput.value = ""
+    minuteinput.value = ""
+    timeinput.value = ""
+}
+let deleteTask=(taskID)=>{
+    tasks = tasks.filter((data)=> data.taskNumber != taskID)
+    if(tasks.length == 0){
+        startTimeChosen = false
+    }
+    createList()
+    updateStorage()
+    searchTask();
+}
+let searchTask = () => {
+    currentTask = -1
+    nextTask = -1
+    getTasks()
+    let nowUnixMins = Math.floor((new Date).getHours()*60+(new Date).getMinutes());
+    if(tasks.length > 0){
+        for(let i = 0; i < tasks.length; i++){  //find ongoing task
+            if (tasks[i].startTime <= nowUnixMins && tasks[i].endTime > nowUnixMins) {
+                currentTask = tasks[i]
+                secondsRemaining = (currentTask.endTime-nowUnixMins)*60 - (new Date).getTime()/1000%60;
+                break;
+            }
+        }
+        for(let i = 0; i < tasks.length; i++){  //find next task
+            if (tasks[i].startTime > nowUnixMins) {
+                nextTask = tasks[i]
+                secondsRemaining = (nextTask.startTime-nowUnixMins)*60 - (new Date).getTime()/1000%60;
+                break;
+            }
+        }
+        
+        if(!intervalIsRunning){     // prevent multiple simultaneous intervals
+            showTime()
+            timeInterval = setInterval(showTime, 1000)
+            intervalIsRunning = true
+        }
+    }
+    else{
+        message.innerHTML = "task list empty!"
+    }
+
+}
+let showTime=()=>{
+    if(currentTask == -1){
+        curr = "None"
+    }
+    else{
+        curr = currentTask.taskName
+    }
+    if(nextTask == -1){
+        nex = "finished"
+    }
+    else{
+        nex = nextTask.taskName
+    }
+    if(currentTask != -1 || nextTask != -1){
+        if(secondsRemaining < 3600){
+            clockscreen.innerHTML = `${curr}: ${String(Math.floor(secondsRemaining/60)).padStart(2, "0")}:${String(Math.floor(secondsRemaining%60)).padStart(2, "0")} until ${nex}`
+        }
+        else{
+            clockscreen.innerHTML = `${curr}: ${Math.floor(secondsRemaining/3600)}:${String(Math.floor(secondsRemaining/60)%60).padStart(2, "0")}:${String(Math.floor(secondsRemaining%60)).padStart(2, "0")} until ${nex}`
+        }
+    }
+    else{
+        clockscreen.innerHTML = `Tasks completed`
+    }
+
+    if(secondsRemaining > 0 && tasks.length > 0 && currentTask != -1){ // task ongoing
+        secondsRemaining --;
+    }
+    else{ // task ended, perform search
+        clearInterval(timeInterval)
+        intervalIsRunning = false
+        searchTask()
+    }
+}
+let updateStorage=()=>{
+    localStorage.setItem("tasks", JSON.stringify(tasks))
+}
+let getTasks=()=>{
+    if(tasks.length == 0 && localStorage.getItem("tasks") != "[]"){
+        tasks = JSON.parse(localStorage.getItem("tasks"))
+        createList()
+        startTimeChosen = true
+    }
+    else if(tasks.length == 0){
+        message.innerHTML = "No tasks available."
+        listItemCount = 0
+    }
+    if(tasks.length > 0){
+        nextFreeTime = tasks[tasks.length-1].endTime
+        listItemCount = tasks[tasks.length-1].taskNumber
+    }
+
+}
+let hideControls=()=>{
+    if(controlsHidden){
+        controls.style.display = "block"
+        hidebtn.innerHTML = "∧"
+        controlsHidden = false
+    }
+    else{
+        controls.style.display = "none"
+        hidebtn.innerHTML = "∨"
+        controlsHidden = true
+    }
+}
+searchTask()
     </script>
     </body>
 </html>
