@@ -132,6 +132,8 @@ let currentTask = -1
 let nextTask = -1
 let intervalIsRunning = false
 let tasks = []
+
+
 let secondsRemaining;
 let controlsHidden = false;
 
@@ -221,7 +223,7 @@ let searchTask = () => {
         }
     }
     else{
-        message.innerHTML = "task list empty!"
+        // message.innerHTML = "task list empty!"
     }
 
 }
@@ -263,12 +265,14 @@ let updateStorage=()=>{
     localStorage.setItem("tasks", JSON.stringify(tasks))
 }
 let getTasks=()=>{
-    if(tasks.length == 0 && localStorage.getItem("tasks") != "[]"){
+    if(tasks.length == 0 && localStorage.getItem("tasks") != "[]" && localStorage.length > 0){
+        // none in array, but existing LS not empty
         tasks = JSON.parse(localStorage.getItem("tasks"))
         createList()
         startTimeChosen = true
     }
     else if(tasks.length == 0){
+        // none in array and LS empty or nonexistent
         message.innerHTML = "No tasks available."
         listItemCount = 0
     }
@@ -291,6 +295,7 @@ let hideControls=()=>{
     }
 }
 searchTask()
+updateStorage() // add empty array to storage if no tasks added
     </script>
     </body>
 </html>
