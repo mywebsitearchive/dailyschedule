@@ -8,14 +8,13 @@
         color: white;
         font-size: 60px;
         margin: 0;
-    }
-    #container{
+    }#container{
         background-color: blueviolet;
         margin: auto;
         width: 900px;
         height: 1500px;
-    }
-    input{
+        position: relative;
+    }input{
         margin: 0;
         margin-right: 50px;
         width: 450px;
@@ -25,22 +24,19 @@
         border: none;
         border-radius: 30px;
         float: right;
-    }
-    p{
+    }p{
         margin: 0;
         margin-left: 50px;
         margin-right: 100px;
         float: left;
         text-align: right;
         line-height: 100px;
-    }
-    #controls p{
+    }#controls p{
         width: 250px;
         height: 100px;
         margin-right: 0;
         background-color: rgb(116, 30, 197);
-    }
-    #controls button{
+    }#controls button{
         width: 185px;
         height: 75px;
         margin: 25px;
@@ -49,24 +45,17 @@
         float: left;
         border-radius: 30px;
         font-size: 50px;
-    }
-    .bigsection{
+    }.bigsection{
         height: 500px;
         width: 900px;
         float: left;
-    }
-    .smallsection{
+    }.smallsection{
         height: 125px;
         width: 100%;
-    }
-    table{
+    }table{
         border: 5px white solid;
         width: 890px;
-    }
-    #mainscreen{
-        position: relative;
-    }
-    #hidebtn{
+    }#hidebtn{
         position: absolute;
         right: 100px;
         width: 100px;
@@ -74,17 +63,42 @@
         border-radius: 30px;
         font-size: 50px;
         opacity: 0.5;
-    }
-    #taskslist button{
+    }#taskslist button{
         width: 70px;
         height: 70px;
         float: left;
         border-radius: 30px;
         font-size: 50px;
+    }#popupscreen{
+        background-color: rgb(71, 31, 108);
+        position: absolute;
+        height: 1400px;
+        width: 700px;
+        top: 0;
+        left: 100px;
+        z-index: 2;
+        display: none;
+    }.btn{
+        float: left;
+        width: 600px;
+        height: 150px;
+        border-radius: 30px;
+        font-size: 50px;
+        margin-left: 50px;
+        margin-top: 30px;
+    }#sidebtn{
+        position: absolute;
+        background-color: rgb(0, 0, 0, 0.5);
+        width: 100vw;
+        height: 100vh;
+        z-index: 1;
+        border: 0;
+        display: none;
     }
     </style>
 </head>
 <body>
+            <button id="sidebtn" onclick="showImport()"></button>
         <div id="container">
             <div id="controls" class="bigsection">
                 <div class="smallsection">
@@ -111,8 +125,8 @@
                         >Add
                     </button>
                     <button onclick="clearInputs()">Clear</button>
-                    <button>Export</button>
-                    <button>Import</button>
+                    <button onclick="copyToClipboard()">Export</button>
+                    <button id="importbutton" onclick="showImport()">Import</button>
                 </div>
             </div>
             <div id="message"></div>
@@ -123,24 +137,36 @@
             <div id="list" class="bigsection">
                 <table id="taskslist"></table>
             </div>
+            <div id="popupscreen">
+                <textarea id="importstr" style="font-size: 50px; max-width: 600px; min-width: 600px; margin-left: 50px; margin-top: 50px; min-height: 200px; max-height: 600px; height: 600px;"></textarea>
+                <button class="btn" onclick="pasteImport()()">Import</button>
+                <button class="btn" onclick="showImport()">Close</button>
+            </div>
         </div>
 <script>
 let nextFreeTime;
 let startTimeChosen = false
-let listItemCount;
+let listItemCount; // gets value with getTasks function
 let currentTask = -1
 let nextTask = -1
-let intervalIsRunning = false
 let tasks = []
 
 
 let secondsRemaining;
-let controlsHidden = false;
+
+let flags = {
+    controlsHidden: false,
+    dialogHidden: true,
+    intervalIsRunning: false,
+}
 
 let addTask=(name, length, startTimeStr)=>{
     message.innerHTML = ""
     let nowUnixMins = Math.floor((new Date).getHours()*60+(new Date).getMinutes());
-        if(name != "" && length > 0){
+        if(length > 0){
+            if(name == ""){
+                name = `Task ${listItemCount+1}`
+            }
             if(!startTimeChosen){
                 let h = startTimeStr.substring(0,2)
                 let m = startTimeStr.substring(3)
@@ -216,10 +242,10 @@ let searchTask = () => {
             }
         }
         
-        if(!intervalIsRunning){     // prevent multiple simultaneous intervals
+        if(!flags.intervalIsRunning){     // prevent multiple simultaneous intervals
             showTime()
             timeInterval = setInterval(showTime, 1000)
-            intervalIsRunning = true
+            flags.intervalIsRunning = true
         }
     }
     else{
@@ -252,12 +278,12 @@ let showTime=()=>{
         clockscreen.innerHTML = `Tasks completed`
     }
 
-    if(secondsRemaining > 0 && tasks.length > 0 && currentTask != -1){ // task ongoing
+    if(secondsRemaining > 0 && tasks.length > 0){ // task ongoing
         secondsRemaining --;
     }
     else{ // task ended, perform search
         clearInterval(timeInterval)
-        intervalIsRunning = false
+        flags.intervalIsRunning = false
         searchTask()
     }
 }
@@ -273,7 +299,7 @@ let getTasks=()=>{
     }
     else if(tasks.length == 0){
         // none in array and LS empty or nonexistent
-        message.innerHTML = "No tasks available."
+        // message.innerHTML = "No tasks available."
         listItemCount = 0
     }
     if(tasks.length > 0){
@@ -283,19 +309,50 @@ let getTasks=()=>{
 
 }
 let hideControls=()=>{
-    if(controlsHidden){
+    if(flags.controlsHidden){
         controls.style.display = "block"
         hidebtn.innerHTML = "∧"
-        controlsHidden = false
+        flags.controlsHidden = false
     }
     else{
         controls.style.display = "none"
         hidebtn.innerHTML = "∨"
-        controlsHidden = true
+        flags.controlsHidden = true
     }
 }
+let copyToClipboard=()=>{
+    navigator.clipboard.writeText(JSON.stringify(tasks))
+    message.innerHTML = "Text copied!"
+}
+    let pasteImport=()=>{
+        try{
+            tasks = JSON.parse(importstr.value)
+            showImport()
+            updateStorage()
+            createList()
+        }
+        catch{
+            alert("Syntax error")
+        }
+    }
+let showImport=()=>{
+    document.getElementById("importstr").focus()
+    importstr.value = ""
+    if(flags.dialogHidden){
+        sidebtn.style.display = "block"
+        popupscreen.style.display = "block"
+        flags.dialogHidden = false
+    }
+    else{
+        sidebtn.style.display = "none"
+        popupscreen.style.display = "none"
+        flags.dialogHidden = true
+    }
+  importstr.focus();
+}
+
 searchTask()
 updateStorage() // add empty array to storage if no tasks added
-    </script>
-    </body>
+</script>
+</body>
 </html>
