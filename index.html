@@ -94,6 +94,22 @@
         z-index: 1;
         border: 0;
         display: none;
+    }@keyframes animatemsg{
+        0% {top: -200px}
+        20%{top: 0;}
+        80%{top: 0;}
+        100%{top: -200px;}
+    } #message{
+        background-color: rgb(12, 119, 12, 0.7);
+        float: left;
+        padding: 30px;
+        border-radius: 20px;
+        cursor: pointer;
+        color: white;
+        position: absolute;
+        width: 740px;
+        left: 50px;
+        top: -200px;
     }
     </style>
 </head>
@@ -129,17 +145,17 @@
                     <button id="importbutton" onclick="showImport()">Import</button>
                 </div>
             </div>
-            <div id="message"></div>
+            <div id="message" onclick="copyToClipboard()">JSON copied to clipboard!</div>
             <div id="mainscreen" class="bigsection">
                 <button id="hidebtn" onclick="hideControls()">∧</button>
                 <div id="clockscreen" class="bigsection"></div>
             </div>
-            <div id="list" class="bigsection">
+            <div id="list" style='overflow: scroll;' class="bigsection">
                 <table id="taskslist"></table>
             </div>
             <div id="popupscreen">
                 <textarea id="importstr" style="font-size: 50px; max-width: 600px; min-width: 600px; margin-left: 50px; margin-top: 50px; min-height: 200px; max-height: 600px; height: 600px;"></textarea>
-                <button class="btn" onclick="pasteImport()()">Import</button>
+                <button class="btn" onclick="pasteImport()">Import</button>
                 <button class="btn" onclick="showImport()">Close</button>
             </div>
         </div>
@@ -322,19 +338,21 @@ let hideControls=()=>{
 }
 let copyToClipboard=()=>{
     navigator.clipboard.writeText(JSON.stringify(tasks))
-    message.innerHTML = "Text copied!"
+    message.style.animation = "none"
+    message.offsetHeight
+    message.style.animation = "animatemsg 1s"
 }
-    let pasteImport=()=>{
-        try{
-            tasks = JSON.parse(importstr.value)
-            showImport()
-            updateStorage()
-            createList()
-        }
-        catch{
-            alert("Syntax error")
-        }
+let pasteImport=()=>{
+    try{
+        tasks = JSON.parse(importstr.value)
+        showImport()
+        updateStorage()
+        createList()
     }
+    catch{
+        alert("Syntax error")
+    }
+}
 let showImport=()=>{
     document.getElementById("importstr").focus()
     importstr.value = ""
