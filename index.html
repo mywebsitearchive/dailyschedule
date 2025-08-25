@@ -170,6 +170,7 @@ let startTimeChosen = false
 let listItemCount; // gets value with getTasks function
 let currentTask = -1
 let nextTask = -1
+let timeInterval;
 let tasks = [
     // taskName
     // startTime
@@ -254,6 +255,7 @@ let searchTask = () => {
     getTasks()
     let nowUnixMins = Math.floor((new Date).getHours()*60+(new Date).getMinutes());
     if(tasks.length > 0){
+        console.log(tasks.length)
         for(let i = 0; i < tasks.length; i++){  //find ongoing task
             if (tasks[i].startTime <= nowUnixMins && tasks[i].endTime > nowUnixMins) {
                 currentTask = tasks[i]
@@ -268,11 +270,15 @@ let searchTask = () => {
                 break;
             }
         }
-        
         if(!flags.intervalIsRunning){     // prevent multiple simultaneous intervals
-            showTime()
-            timeInterval = setInterval(showTime, 1000)
-            flags.intervalIsRunning = true
+            if(currentTask == -1 && nextTask == -1){ // no interval if tasks done
+                clockscreen.innerHTML = `Tasks completed`
+            }
+            else{
+                showTime()
+                timeInterval = setInterval(showTime, 1000)
+                flags.intervalIsRunning = true
+            }
         }
     }
     else{
