@@ -3,18 +3,18 @@
 <head>
     <meta charset="utf-8">
     <style>
-    body{
+body{
         background-color: black;
         color: white;
         font-size: 60px;
         margin: 0;
-    }#container{
+} #container{
         background-color: blueviolet;
         margin: auto;
         width: 900px;
         height: 1500px;
         position: relative;
-    }input{
+} input{
         margin: 0;
         margin-right: 50px;
         width: 450px;
@@ -24,19 +24,19 @@
         border: none;
         border-radius: 30px;
         float: right;
-    }p{
+} p{
         margin: 0;
         margin-left: 50px;
         margin-right: 100px;
         float: left;
         text-align: right;
         line-height: 100px;
-    }#controls p{
+} #controls p{
         width: 250px;
         height: 100px;
         margin-right: 0;
         background-color: rgb(116, 30, 197);
-    }#controls button{
+} #controls button{
         width: 185px;
         height: 75px;
         margin: 25px;
@@ -45,17 +45,17 @@
         float: left;
         border-radius: 30px;
         font-size: 50px;
-    }.bigsection{
+} .bigsection{
         height: 500px;
         width: 900px;
         float: left;
-    }.smallsection{
+} .smallsection{
         height: 125px;
         width: 100%;
-    }table{
+} table{
         border: 5px white solid;
         width: 890px;
-    }#hidebtn{
+} #hidebtn{
         position: absolute;
         right: 100px;
         width: 100px;
@@ -63,13 +63,13 @@
         border-radius: 30px;
         font-size: 50px;
         opacity: 0.5;
-    }#taskslist button{
+} #taskslist button{
         width: 70px;
         height: 70px;
         float: left;
         border-radius: 30px;
         font-size: 50px;
-    }#popupscreen{
+} #popupscreen{
         background-color: rgb(71, 31, 108);
         position: absolute;
         height: 1400px;
@@ -78,7 +78,7 @@
         left: 100px;
         z-index: 2;
         display: none;
-    }.btn{
+} .btn{
         float: left;
         width: 600px;
         height: 150px;
@@ -86,7 +86,7 @@
         font-size: 50px;
         margin-left: 50px;
         margin-top: 30px;
-    }#sidebtn{
+} #sidebtn{
         position: absolute;
         background-color: rgb(0, 0, 0, 0.5);
         width: 100vw;
@@ -94,45 +94,44 @@
         z-index: 1;
         border: 0;
         display: none;
-    }@keyframes animatemsg{
+} @keyframes animatemsg{
         0% {top: -200px}
         20%{top: 0;}
         80%{top: 0;}
         100%{top: -200px;}
-    } #message{
+} #message{
         background-color: rgb(12, 119, 12, 0.7);
         float: left;
         padding: 30px;
         border-radius: 20px;
-        cursor: pointer;
         color: white;
         position: absolute;
         width: 740px;
         left: 50px;
         top: -200px;
-    }
+}
     </style>
 </head>
 <body>
             <button id="sidebtn" onclick="showImport()"></button>
         <div id="container">
-            <div id="controls" class="bigsection">
-                <div class="smallsection">
+            <div id="controls" class="bigsection" style="height: 625px;">
+                <div class="smallsection"> <!-- time -->
                     <p>Time:</p>
                     <input
                         type="time"
                         id="timeinput">
                 </div>
-                <div class="smallsection">
+                <div class="smallsection"> <!-- length -->
                     <p>Length:</p>
                     <p style="float: right; margin-right: 50px; margin-left: 0; text-align: center; width: 200px;">min</p>
                     <input id="minuteinput" style="margin-right: 0; width: 250px;" >
                 </div>
-                <div class="smallsection">
+                <div class="smallsection"> <!-- name -->
                     <p>Name:</p>
                     <input id="tasknameinput">
                 </div>
-                <div class="smallsection">
+                <div class="smallsection"> <!-- buttons top -->
                     <button onclick="addTask(
                         tasknameinput.value,
                         Number(minuteinput.value),
@@ -142,11 +141,17 @@
                     </button>
                     <button onclick="clearInputs()">Clear</button>
                     <button onclick="copyToClipboard()">Export</button>
-                    <button id="importbutton" onclick="showImport()">Import</button>
+                    <button onclick="showImport()">Import</button>
+                </div>
+                <div class="smallsection"> <!-- buttons bottom -->
+                    <button onclick="delayTasks(10)">+10m</button>
+                    <button onclick="delayTasks(60)">+1h</button>
+                    <button onclick=""></button>
+                    <button onclick=""></button>
                 </div>
             </div>
-            <div id="message" onclick="copyToClipboard()">JSON copied to clipboard!</div>
-            <div id="mainscreen" class="bigsection">
+            <div id="message">JSON copied to clipboard!</div>
+            <div id="mainscreen" class="bigsection" style="height: 375px;">
                 <button id="hidebtn" onclick="hideControls()">∧</button>
                 <div id="clockscreen" class="bigsection"></div>
             </div>
@@ -165,7 +170,13 @@ let startTimeChosen = false
 let listItemCount; // gets value with getTasks function
 let currentTask = -1
 let nextTask = -1
-let tasks = []
+let tasks = [
+    // taskName
+    // startTime
+    // endTime
+    // timeText
+    // taskNumber
+]
 
 
 let secondsRemaining;
@@ -195,7 +206,7 @@ let addTask=(name, length, startTimeStr)=>{
                 startTimeChosen = true
             }
             else{
-            nextFreeTime = tasks[tasks.length-1].endTime
+                nextFreeTime = tasks[tasks.length-1].endTime
             }
 
             let hoursStr = String(Math.floor(nextFreeTime/60)%24).padStart(2, "0")
@@ -368,7 +379,26 @@ let showImport=()=>{
     }
   importstr.focus();
 }
-
+let delayTasks=(amount)=>{
+    for(let i=0; i<tasks.length; i++){
+        tasks[i].startTime += amount
+        tasks[i].endTime += amount
+        if(tasks[i].startTime > 1440){
+            tasks[i].startTime -= 1440
+        }
+        if(tasks[i].endTime > 1440){
+            tasks[i].endTime -= 1440
+        }
+        
+        let hoursStr = String(Math.floor((tasks[i].startTime)/60)%24).padStart(2, "0")
+        let minsStr = String((tasks[i].startTime)%60).padStart(2, "0")
+        let endHoursStr = String(Math.floor(((tasks[i].endTime))/60)%24).padStart(2, "0")
+        let endMinsStr = String(((tasks[i].endTime))%60).padStart(2, "0")
+        tasks[i].timeText = `${hoursStr}:${minsStr} - ${endHoursStr}:${endMinsStr}`
+    }
+    createList()
+    updateStorage()
+}
 searchTask()
 updateStorage() // add empty array to storage if no tasks added
 </script>
