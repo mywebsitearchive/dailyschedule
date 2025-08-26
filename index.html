@@ -146,8 +146,8 @@ body{
                 <div class="smallsection"> <!-- buttons bottom -->
                     <button onclick="delayTasks(10)">+10m</button>
                     <button onclick="delayTasks(60)">+1h</button>
-                    <button onclick=""></button>
-                    <button onclick=""></button>
+                    <button onclick="delayTasks(-10)">-10m</button>
+                    <button onclick="delayTasks(-60)">-1h</button>
                 </div>
             </div>
             <div id="message">JSON copied to clipboard!</div>
@@ -189,7 +189,6 @@ let flags = {
 }
 
 let addTask=(name, length, startTimeStr)=>{
-    message.innerHTML = ""
     let nowUnixMins = Math.floor((new Date).getHours()*60+(new Date).getMinutes());
         if(length > 0){
             if(name == ""){
