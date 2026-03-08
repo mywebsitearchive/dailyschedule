@@ -4,17 +4,51 @@
     <meta charset="utf-8">
     <style>
 body{
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
         background-color: black;
         color: white;
         font-size: 60px;
         margin: 0;
 } #container{
-        background-color: blueviolet;
-        margin: auto;
-        width: 900px;
-        height: 1500px;
-        position: relative;
-} input{
+    background-color: blueviolet;
+    margin: auto;
+    width: 900px;
+    height: 1600px;
+    position: relative;
+} #navi{
+    height: 100px;
+    width: 900px;
+    margin: auto;
+    position: relative;
+    background-color: blueviolet;
+    padding-bottom: 50px;
+} #navibtn{
+    float: left;
+    height: 100px;
+    width: 450px;
+    text-align: center;
+    background-color: blueviolet;
+    cursor: pointer;
+    line-height:100px;
+    border-radius: 0 0 40px 0;
+} #navibtn2{
+    float: left;
+    height: 100px;
+    width: 450px;
+    text-align: center;
+    background-color: rgb(97, 31, 160);
+    cursor: pointer;
+    line-height:100px;
+    border-radius: 0 0 0 40px;
+} #container2{
+    background-color: blueviolet;
+    margin: auto;
+    width: 900px;
+    height: 1600px;
+    position: relative;
+    display: none;
+}
+input{
         margin: 0;
         margin-right: 50px;
         width: 450px;
@@ -35,8 +69,7 @@ body{
         width: 250px;
         height: 100px;
         margin-right: 0;
-        background-color: rgb(116, 30, 197);
-} #controls button{
+} #controls button, #container2 button{
         width: 185px;
         height: 75px;
         margin: 25px;
@@ -95,10 +128,10 @@ body{
         border: 0;
         display: none;
 } @keyframes animatemsg{
-        0% {top: -200px}
+        0% {top: -500px}
         20%{top: 0;}
         80%{top: 0;}
-        100%{top: -200px;}
+        100%{top: -500px;}
 } #message{
         background-color: rgb(12, 119, 12, 0.7);
         float: left;
@@ -107,14 +140,53 @@ body{
         color: white;
         position: absolute;
         width: 740px;
+        z-index: 2;
         left: 50px;
-        top: -200px;
+        top: -500px;
+} .dialogi{
+        background-color: rgb(12, 119, 12);
+        padding: 30px;
+        border-radius: 20px;
+        color: white;
+        position: absolute;
+        width: 740px;
+        height: 200px;
+        z-index: 2;
+        left: 50px;
+        line-height: 100px;
+        top: 0;
+} .dialogi button{
+        width: 300px;
+        height: 75px;
+        margin: 25px;
+        margin-left: 20px;
+        margin-right: 20px;
+        float: left;
+        border-radius: 30px;
+        font-size: 50px;
+} #todoslist {
+    border-collapse: collapse;
+    font-size: 40px;
+} #importtodos{
+    min-width: 800px;
+    min-height: 200px;
+    max-width: 800px;
+    max-height: 200px;
+    margin-left: 50px;
+    resize: none;
+    font-size: 30px;
+    display: none;
 }
     </style>
 </head>
 <body>
             <button id="sidebtn" onclick="showImport()"></button>
-        <div id="container">
+            <div id="message">JSON copied to clipboard!</div>
+            <div id="navi">
+                <div id="navibtn" onclick="changeView(1)">Schedule</div>
+                <div id="navibtn2" onclick="changeView(2)">To Do</div>
+            </div>
+        <div id="container"> <!--------------------------------------------------------------->
             <div id="controls" class="bigsection" style="height: 625px;">
                 <div class="smallsection"> <!-- time -->
                     <p>Time:</p>
@@ -139,7 +211,7 @@ body{
                         )"
                         >Add
                     </button>
-                    <button onclick="clearInputs()">Clear</button>
+                    <button onclick="clearTasks()">Clear</button>
                     <button onclick="copyToClipboard()">Export</button>
                     <button onclick="showImport()">Import</button>
                 </div>
@@ -150,12 +222,11 @@ body{
                     <button onclick="delayTasks(-60)">-1h</button>
                 </div>
             </div>
-            <div id="message">JSON copied to clipboard!</div>
             <div id="mainscreen" class="bigsection" style="height: 375px;">
                 <button id="hidebtn" onclick="hideControls()">∧</button>
                 <div id="clockscreen" class="bigsection"></div>
             </div>
-            <div id="list" style='overflow: scroll;' class="bigsection">
+            <div style='overflow: scroll;' class="bigsection">
                 <table id="taskslist"></table>
             </div>
             <div id="popupscreen">
@@ -164,35 +235,71 @@ body{
                 <button class="btn" onclick="showImport()">Close</button>
             </div>
         </div>
+        <div id="container2"> <!--------------------------------------------------------------->
+            <div id="controls" class="bigsection" style="height: 625px;">
+                <div class="smallsection"> <!-- name -->
+                    <p>Name:</p>
+                    <input id="todonameinput">
+                </div>
+                <div class="smallsection"> <!-- name -->
+                    <p title="How often to do it">Weeks:</p>
+                    <input size="60px" id="weekinput">
+                </div>
+                <div class="smallsection"> <!-- buttons top -->
+                    <button onclick="addToDo(
+                        todonameinput.value,
+                        weekinput.value
+                        )"
+                        >Add
+                    </button>
+                    <button onclick="clearTodosDialog()">Clear</button>
+                    <button onclick="copyTodos()">Export</button>
+                    <button onclick="importTodos()">Import</button>
+                </div>
+                <textarea id="importtodos"></textarea>
+            </div>
+            <div style='overflow: scroll; height:900px;' class="bigsection">
+                <table id="todoslist"></table>
+            </div>
+        </div>
 <script>
-let nextFreeTime;
-let startTimeChosen = false
-let listItemCount; // gets value with getTasks function
-let currentTask = -1
-let nextTask = -1
-let timeInterval;
-let tasks = [
-    // taskName
-    // startTime
-    // endTime
-    // timeText
-    // taskNumber
-]
+    if(localStorage.length == 0){
+        localStorage.setItem("tasks", "[]")
+        localStorage.setItem("todos", "[]")
+    }
 
-
+    let nextFreeTime;
+    let startTimeChosen = false
+    let listItemCount; // gets value with getTasks function
+    let currentTask = -1
+    let nextTask = -1
+    let timeInterval;
+    let tasks = [
+        // taskName
+        // startTime
+        // endTime
+        // timeText
+        // taskNumber
+    ]
+    let todos = [
+        // todoName
+        // endDate
+        // lengthDays
+        // id
+    ]
 let secondsRemaining;
-
+let currentView = 1;
 let flags = {
     controlsHidden: false,
     dialogHidden: true,
     intervalIsRunning: false,
+    textareaShown : false,
 }
-
 let addTask=(name, length, startTimeStr)=>{
     let nowUnixMins = Math.floor((new Date).getHours()*60+(new Date).getMinutes());
         if(length > 0){
             if(name == ""){
-                name = `Task ${listItemCount+1}`
+                name = `Task ${tasks.length+1}`
             }
             if(!startTimeChosen){
                 let h = startTimeStr.substring(0,2)
@@ -229,17 +336,25 @@ let addTask=(name, length, startTimeStr)=>{
         updateStorage()
 }
 let createList=()=>{
-    taskslist.innerHTML = ""
-    for(let i = 0; i < tasks.length; i++){
-            taskslist.innerHTML += `<tr><td>${tasks[i].taskName}</td><td>${tasks[i].timeText}</td><td><button onclick="deleteTask(${tasks[i].taskNumber})">x</botton></td></tr>`
+    if(JSON.stringify(tasks) != "[]" && JSON.stringify(tasks) != "null"){
+        taskslist.innerHTML = ""
+        for(let i = 0; i < tasks.length; i++){
+                taskslist.innerHTML += `<tr><td>${tasks[i].taskName}</td><td>${tasks[i].timeText}</td><td><button onclick="deleteTask(${tasks[i].taskNumber})">x</botton></td></tr>`
+        }
+    }
+    else{
+        taskslist.innerHTML = ""
     }
 }
-let clearInputs=()=>{
-    tasknameinput.value = ""
-    minuteinput.value = ""
-    timeinput.value = ""
+let clearTasks=()=>{
+    startTimeChosen = false;
+    tasks = []
+    createList()
+    updateStorage()
+    searchTask();
+    messageAlert("Tasks cleared")
 }
-let deleteTask=(taskID)=>{
+const deleteTask=(taskID)=>{
     tasks = tasks.filter((data)=> data.taskNumber != taskID)
     if(tasks.length == 0){
         startTimeChosen = false
@@ -248,13 +363,12 @@ let deleteTask=(taskID)=>{
     updateStorage()
     searchTask();
 }
-let searchTask = () => {
+const searchTask = () => {
     currentTask = -1
     nextTask = -1
     getTasks()
     let nowUnixMins = Math.floor((new Date).getHours()*60+(new Date).getMinutes());
     if(tasks.length > 0){
-        console.log(tasks.length)
         for(let i = 0; i < tasks.length; i++){  //find ongoing task
             if (tasks[i].startTime <= nowUnixMins && tasks[i].endTime > nowUnixMins) {
                 currentTask = tasks[i]
@@ -285,7 +399,7 @@ let searchTask = () => {
     }
 
 }
-let showTime=()=>{
+const showTime=()=>{
     if(currentTask == -1){
         curr = "None"
     }
@@ -319,28 +433,33 @@ let showTime=()=>{
         searchTask()
     }
 }
-let updateStorage=()=>{
-    localStorage.setItem("tasks", JSON.stringify(tasks))
+const updateStorage=()=>{
+    if(currentView == 1){
+        localStorage.setItem("tasks", JSON.stringify(tasks))
+    }
+    else{
+        localStorage.setItem("todos", JSON.stringify(todos))
+    }
 }
-let getTasks=()=>{
-    if(tasks.length == 0 && localStorage.getItem("tasks") != "[]" && localStorage.length > 0){
-        // none in array, but existing LS not empty
-        tasks = JSON.parse(localStorage.getItem("tasks"))
-        createList()
-        startTimeChosen = true
-    }
-    else if(tasks.length == 0){
-        // none in array and LS empty or nonexistent
-        // message.innerHTML = "No tasks available."
-        listItemCount = 0
-    }
-    if(tasks.length > 0){
-        nextFreeTime = tasks[tasks.length-1].endTime
-        listItemCount = tasks[tasks.length-1].taskNumber
-    }
-
+const getTasks=()=>{
+        console.log("tasks exist!")
+        if(tasks.length == 0 && localStorage.getItem("tasks") != "[]"){
+            // none in array, but LS not empty
+            tasks = JSON.parse(localStorage.getItem("tasks"))
+            createList()
+            startTimeChosen = true
+        }
+        else if(tasks.length == 0){
+            // none in array or LS empty
+            // message.innerHTML = "No tasks available."
+            listItemCount = 0
+        }
+        if(tasks.length > 0){
+            nextFreeTime = tasks[tasks.length-1].endTime
+            listItemCount = tasks[tasks.length-1].taskNumber
+        }
 }
-let hideControls=()=>{
+const hideControls=()=>{
     if(flags.controlsHidden){
         controls.style.display = "block"
         hidebtn.innerHTML = "∧"
@@ -352,24 +471,26 @@ let hideControls=()=>{
         flags.controlsHidden = true
     }
 }
-let copyToClipboard=()=>{
+const copyToClipboard=()=>{
     navigator.clipboard.writeText(JSON.stringify(tasks))
+    message.innerHTML = "Tasks copied to clipboard!"
     message.style.animation = "none"
     message.offsetHeight
     message.style.animation = "animatemsg 1s"
 }
-let pasteImport=()=>{
+const pasteImport=()=>{
     try{
         tasks = JSON.parse(importstr.value)
         showImport()
         updateStorage()
         createList()
+        messageAlert("Successfully imported")
     }
     catch{
-        alert("Syntax error")
+        messageAlert("Syntax error", "rgba(119, 12, 12, 0.7)")
     }
 }
-let showImport=()=>{
+const showImport=()=>{
     document.getElementById("importstr").focus()
     importstr.value = ""
     if(flags.dialogHidden){
@@ -384,7 +505,7 @@ let showImport=()=>{
     }
   importstr.focus();
 }
-let delayTasks=(amount)=>{
+const delayTasks=(amount)=>{
     for(let i=0; i<tasks.length; i++){
         tasks[i].startTime += amount
         tasks[i].endTime += amount
@@ -404,8 +525,206 @@ let delayTasks=(amount)=>{
     createList()
     updateStorage()
 }
+const changeView=(view)=>{
+    localStorage.setItem("view", view);
+    switch(view){
+        case 1:
+            container.style.display = "block"
+            container2.style.display = "none"
+            navibtn.style.backgroundColor = "blueviolet"
+            navibtn2.style.backgroundColor = "rgb(97, 31, 160)"
+            break;
+        case 2:
+            container.style.display = "none"
+            container2.style.display = "block"
+            navibtn.style.backgroundColor = "rgb(97, 31, 160)"
+            navibtn2.style.backgroundColor = "blueviolet"
+            break;
+    }
+    currentView = view;
+}
+const addToDo=(name, weeks)=>{
+    let now = Math.floor((new Date().getTime())/86400000)
+    let days;
+    let idArray = []
+    if(todos.length > 0){
+        for(let i in todos){
+            idArray[i] = todos[i].id
+        }
+    }
+    else{
+        idArray = [0]
+    }
+    console.log(idArray)
+    if(isNaN(weeks) || weeks <= 0){
+        days = 7;
+    }
+    else{
+        days = 7*weeks
+    }
+    if(name == ""){
+        name = "Task "+(Math.max(...idArray)+1)
+    }
+    todos.push({
+        todoName : name,
+        endDate : Number(now) + days,
+        lengthDays: days,
+        id : idArray.length > 0? (Math.max(...idArray)+1) : 1
+    })
+    createTodos()
+    updateStorage()
+    console.log(JSON.stringify(todos))
+}
+const createTodos=()=>{
+    if(JSON.stringify(todos) != "[]" && JSON.stringify(todos) != "null"){
+        todos = todos.sort((a,b)=>a.endDate-b.endDate)
+        todoslist.innerHTML = ""
+        let now = Math.floor((new Date().getTime())/86400000);
+        for(let i = 0; i < todos.length; i++){
+            let toGo = todos[i].endDate-now;
+            let toDo = todos[i].todoName
+            let bgColor = "rgb(139, 59, 59)"; // red
+            if(toGo > 3){
+                bgColor = "rgb(84, 139, 59)" // green
+            }else if(toGo > 0){
+                bgColor = "rgb(139, 124, 59)" // yellow
+            }
+            if(toDo.length > 12){
+                toDo = toDo.substring(0,11)+"..."
+            }
+            todoslist.innerHTML += `<tr style="background-color:${bgColor};">
+                                        <td title="${todos[i].todoName}">${toDo} <i></i></td>
+                                        <td style="color:rgb(192, 192, 192); font-size:30px">(${Math.round(todos[i].lengthDays)}d)</td>
+                                        <td>${Math.round(toGo)}d</td>
+                                        <td><button style="width:80px" onclick="resetTodoTimer(${todos[i].id})"">✓</button></td>
+                                        <td><button style="width:80px" onclick="deletionDialog(${todos[i].id})">x</button></td>
+                                    </tr>`
+        }
+    }
+    else{
+        todoslist.innerHTML = ""
+    }
+}
+const clearTodosDialog=()=>{
+    document.body.innerHTML += `<div id="deletionpopup2" class="dialogi">Clear ToDos?<br>
+                                    <button
+                                        onclick="clearTodos(false)"
+                                        >
+                                        Sure.
+                                    </button>
+                                    <button
+                                        onclick="clearTodos(true)"
+                                        >
+                                        Nah.
+                                    </button>
+                                </div>`
+}
+const clearTodos=(abort)=>{
+    if(!abort){
+        todos = [];
+        todoslist.innerHTML = ""
+        messageAlert("Todos cleared!")
+        updateStorage();
+    }
+    deletionpopup2.remove()
+}
+const copyTodos=()=>{
+    navigator.clipboard.writeText(JSON.stringify(todos))
+    messageAlert("Todos copied!")
+}
+const getTodos=()=>{
+    if(localStorage.getItem("todos")!= null){
+        todos = JSON.parse(localStorage.getItem("todos"))
+    }
+    createTodos()
+}
+const chooseView=()=>{
+    if(localStorage.getItem("view") != null){
+        changeView(Number(localStorage.getItem("view")))
+    }else{
+        changeView(1)
+    }
+}
+const deletionDialog=(id)=>{
+    let taskToDelete = "";
+    for(let i in todos){
+        if(todos[i].id == id){
+            taskToDelete = todos[i].todoName
+        }
+    }
+    if(taskToDelete.length > 13){
+        console.log(taskToDelete.length)
+        taskToDelete = taskToDelete.substring(0,12)+"..."
+    }
+    document.body.innerHTML += `<div id="deletionpopup" class="dialogi">Delete ${taskToDelete}?<br>
+                                    <button
+                                        onclick="deleteTodo(${id}, false)"
+                                        >
+                                        Sure.
+                                    </button>
+                                    <button
+                                        onclick="deleteTodo(${id}, true)"
+                                        >
+                                        Nah.
+                                    </button>
+                                </div>`
+}
+const deleteTodo=(id, abort)=>{
+    if(!abort){
+        todos = todos.filter((a)=>a.id != id)
+        createTodos()
+        updateStorage()
+        messageAlert("Task deleted")
+    }
+    deletionpopup.remove()
+}
+const importTodos=()=>{
+    if(flags.textareaShown){
+        try{
+            todos = JSON.parse(importtodos.value)
+            updateStorage()
+            createTodos()
+            messageAlert("Imported successfully")
+            importtodos.style.display = "none"
+            flags.textareaShown = false;
+        }
+        catch{
+            messageAlert("Syntax error", "rgba(119, 12, 12, 0.7)")
+        }
+    }else{
+        importtodos.style.display = "block"
+        importtodos.value = ""
+        flags.textareaShown = true;
+    }
+
+}
+const messageAlert=(text, color)=>{
+    message.innerHTML = text
+    message.style.animation = "none"
+    message.offsetHeight
+    message.style.animation = "animatemsg 1s"
+    message.style.backgroundColor = typeof color == "undefined"? "rgb(12, 119, 12, 0.7)" : color
+}
+const resetTodoTimer=(id)=>{
+    console.log(`ID = ${id}`)
+    let now = Math.floor((new Date().getTime())/86400000)
+    for(let i in todos){
+        if(todos[i].id == id){
+            todos[i].endDate = now + todos[i].lengthDays;
+            messageAlert(`${todos[i].todoName} done!`)
+            createTodos()
+            updateStorage()
+            break;
+        }
+    }
+}
+
+
+
+getTodos()
 searchTask()
 updateStorage() // add empty array to storage if no tasks added
+chooseView()
 </script>
 </body>
 </html>
