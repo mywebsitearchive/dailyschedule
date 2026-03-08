@@ -2,6 +2,10 @@
 <html lang="en-GB">
 <head>
     <meta charset="utf-8">
+        <link 
+        rel="icon" 
+        type="image/x-icon" 
+        href="https://upload.wikimedia.org/wikipedia/commons/3/3d/Clock_icon.png">
     <style>
 body{
     font-family: Verdana, Geneva, Tahoma, sans-serif;
@@ -473,10 +477,7 @@ const hideControls=()=>{
 }
 const copyToClipboard=()=>{
     navigator.clipboard.writeText(JSON.stringify(tasks))
-    message.innerHTML = "Tasks copied to clipboard!"
-    message.style.animation = "none"
-    message.offsetHeight
-    message.style.animation = "animatemsg 1s"
+    messageAlert("Tasks copied to clipboard!")
 }
 const pasteImport=()=>{
     try{
@@ -596,7 +597,7 @@ const createTodos=()=>{
                                         <td title="${todos[i].todoName}">${toDo} <i></i></td>
                                         <td style="color:rgb(192, 192, 192); font-size:30px">(${Math.round(todos[i].lengthDays)}d)</td>
                                         <td>${Math.round(toGo)}d</td>
-                                        <td><button style="width:80px" onclick="resetTodoTimer(${todos[i].id})"">✓</button></td>
+                                        <td><button style="width:80px" onclick="resetTodoDialog(${todos[i].id})"">✓</button></td>
                                         <td><button style="width:80px" onclick="deletionDialog(${todos[i].id})">x</button></td>
                                     </tr>`
         }
@@ -606,7 +607,7 @@ const createTodos=()=>{
     }
 }
 const clearTodosDialog=()=>{
-    document.body.innerHTML += `<div id="deletionpopup2" class="dialogi">Clear ToDos?<br>
+    document.body.innerHTML += `<div id="cleartodospopup" class="dialogi">Clear ToDos?<br>
                                     <button
                                         onclick="clearTodos(false)"
                                         >
@@ -626,7 +627,7 @@ const clearTodos=(abort)=>{
         messageAlert("Todos cleared!")
         updateStorage();
     }
-    deletionpopup2.remove()
+    cleartodospopup.remove()
 }
 const copyTodos=()=>{
     navigator.clipboard.writeText(JSON.stringify(todos))
@@ -690,6 +691,7 @@ const importTodos=()=>{
         }
         catch{
             messageAlert("Syntax error", "rgba(119, 12, 12, 0.7)")
+            
         }
     }else{
         importtodos.style.display = "block"
@@ -705,20 +707,46 @@ const messageAlert=(text, color)=>{
     message.style.animation = "animatemsg 1s"
     message.style.backgroundColor = typeof color == "undefined"? "rgb(12, 119, 12, 0.7)" : color
 }
-const resetTodoTimer=(id)=>{
-    console.log(`ID = ${id}`)
-    let now = Math.floor((new Date().getTime())/86400000)
+const resetTodoDialog=(id)=>{
+    let taskToReset = "";
     for(let i in todos){
         if(todos[i].id == id){
-            todos[i].endDate = now + todos[i].lengthDays;
-            messageAlert(`${todos[i].todoName} done!`)
-            createTodos()
-            updateStorage()
-            break;
+            taskToReset = todos[i].todoName
         }
     }
+    if(taskToReset.length > 13){
+        console.log(taskToReset.length)
+        taskToReset = taskToReset.substring(0,12)+"..."
+    }
+    document.body.innerHTML += `<div id="completionpopup" class="dialogi">Complete ${taskToReset}?<br>
+                                    <button
+                                        onclick="resetTodo(${id}, false)"
+                                        >
+                                        Sure.
+                                    </button>
+                                    <button
+                                        onclick="resetTodo(${id}, true)"
+                                        >
+                                        Nah.
+                                    </button>
+                                </div>`
 }
-
+const resetTodo=(id,abort)=>{
+    if(!abort){
+        console.log(`ID = ${id}`)
+        let now = Math.floor((new Date().getTime())/86400000)
+        for(let i in todos){
+            if(todos[i].id == id){
+                todos[i].endDate = now + todos[i].lengthDays;
+                messageAlert(`${todos[i].todoName} done!`)
+                createTodos()
+                updateStorage()
+                break;
+            }
+        }
+    }
+    completionpopup.remove()
+}
 
 
 getTodos()
