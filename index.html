@@ -246,13 +246,13 @@ input{
                     <input id="todonameinput">
                 </div>
                 <div class="smallsection"> <!-- name -->
-                    <p title="How often to do it">Weeks:</p>
-                    <input size="60px" id="weekinput">
+                    <p title="How often to do it">Days:</p>
+                    <input size="60px" id="daysinput">
                 </div>
                 <div class="smallsection"> <!-- buttons top -->
                     <button onclick="addToDo(
                         todonameinput.value,
-                        weekinput.value
+                        daysinput.value
                         )"
                         >Add
                     </button>
@@ -544,9 +544,8 @@ const changeView=(view)=>{
     }
     currentView = view;
 }
-const addToDo=(name, weeks)=>{
+const addToDo=(name, days)=>{
     let now = Math.floor((new Date().getTime())/86400000)
-    let days;
     let idArray = []
     if(todos.length > 0){
         for(let i in todos){
@@ -556,12 +555,12 @@ const addToDo=(name, weeks)=>{
     else{
         idArray = [0]
     }
-    console.log(idArray)
-    if(isNaN(weeks) || weeks <= 0){
+    if(isNaN(days) || days <= 0){
         days = 7;
     }
-    else{
-        days = 7*weeks
+    if(!Number.isInteger(days)){
+        messageAlert(`${days} ≈ ${Math.ceil(days)}`)
+        days = Math.ceil(days)
     }
     if(name == ""){
         name = "Task "+(Math.max(...idArray)+1)
@@ -585,9 +584,9 @@ const createTodos=()=>{
             let toGo = todos[i].endDate-now;
             let toDo = todos[i].todoName
             let bgColor = "rgb(139, 59, 59)"; // red
-            if(toGo > 3){
+            if(toGo / todos[i].lengthDays > 0.33){
                 bgColor = "rgb(84, 139, 59)" // green
-            }else if(toGo > 0){
+            }else if(toGo >= 0){
                 bgColor = "rgb(139, 124, 59)" // yellow
             }
             if(toDo.length > 12){
@@ -681,17 +680,23 @@ const deleteTodo=(id, abort)=>{
 }
 const importTodos=()=>{
     if(flags.textareaShown){
-        try{
-            todos = JSON.parse(importtodos.value)
-            updateStorage()
-            createTodos()
-            messageAlert("Imported successfully")
-            importtodos.style.display = "none"
-            flags.textareaShown = false;
+        if(importtodos.value.length > 0){
+            try{
+                todos = JSON.parse(importtodos.value)
+                updateStorage()
+                createTodos()
+                messageAlert("Imported successfully")
+                importtodos.style.display = "none"
+                flags.textareaShown = false;
+            }
+            catch{
+                messageAlert("Syntax error", "rgba(119, 12, 12, 0.7)")
+                
+            }
         }
-        catch{
-            messageAlert("Syntax error", "rgba(119, 12, 12, 0.7)")
-            
+        else{
+                importtodos.style.display = "none"
+                flags.textareaShown = false;
         }
     }else{
         importtodos.style.display = "block"
