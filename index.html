@@ -558,7 +558,7 @@ const addToDo=(name, days)=>{
     if(isNaN(days) || days <= 0){
         days = 7;
     }
-    if(!Number.isInteger(days)){
+    if(!Number.isInteger(Number(days))){
         messageAlert(`${days} ≈ ${Math.ceil(days)}`)
         days = Math.ceil(days)
     }
