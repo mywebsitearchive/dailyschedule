@@ -584,7 +584,7 @@ const createTodos=()=>{
             let toGo = todos[i].endDate-now;
             let toDo = todos[i].todoName
             let bgColor = "rgb(139, 59, 59)"; // red
-            if(toGo / todos[i].lengthDays > 0.33){
+            if(toGo / todos[i].lengthDays > 0.1){
                 bgColor = "rgb(84, 139, 59)" // green
             }else if(toGo >= 0){
                 bgColor = "rgb(139, 124, 59)" // yellow
