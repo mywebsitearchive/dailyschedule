@@ -577,9 +577,9 @@ const addToDo=(name, days)=>{
 }
 const createTodos=()=>{
     if(JSON.stringify(todos) != "[]" && JSON.stringify(todos) != "null"){
-        todos = todos.sort((a,b)=>a.endDate-b.endDate)
-        todoslist.innerHTML = ""
         let now = Math.floor((new Date().getTime())/86400000);
+        todos = todos.sort((a,b)=>b.lengthDays-a.lengthDays).sort((a,b)=>a.endDate-b.endDate)
+        todoslist.innerHTML = ""
         for(let i = 0; i < todos.length; i++){
             let toGo = todos[i].endDate-now;
             let toDo = todos[i].todoName
