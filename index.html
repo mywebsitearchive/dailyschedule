@@ -568,7 +568,7 @@ const addToDo=(name, days)=>{
     todos.push({
         todoName : name,
         endDate : Number(now) + Number(days),
-        lengthDays: days,
+        lengthDays: Number(days),
         id : idArray.length > 0? (Math.max(...idArray)+1) : 1
     })
     createTodos()
