@@ -193,6 +193,24 @@ body{
     margin-left: 20px;
     height: 100px;
     line-height: 100px;
+} #big-import-dialog{
+    display: none;
+    border: 0.25vw solid white;
+    left: 10vw;
+    z-index: 1;
+    width: 69.5vw;
+    background-color: rgb(71, 31, 108);
+    position: absolute;
+    border-radius: 20px;
+    padding: 5vw;
+} #big-import-dialog textarea{
+    font-size: 30px;
+    resize: none;
+    padding: 2%;
+    width: 86%;
+    margin: 5%;
+    height: 200px;
+    border-radius: 20px;
 }
     </style>
 </head>
@@ -203,6 +221,11 @@ body{
                 <div id="b1" onclick="changeView(1)">Schedule</div>
                 <div id="b2" onclick="changeView(2)">To Do</div>
                 <div id="b3" onclick="changeView(3)">Habits</div>
+            </div>
+            <div id="big-import-dialog">
+                <textarea id="importtextfield"></textarea>
+                <button id="importdata" onclick="importData()" style="margin-left: 5%;" class="addbtn">Import</button>
+                <button id="closeimport" style="margin-left: 5%;" class="addbtn">Close</button>
             </div>
         <div id="container"> <!--------------------------------------------------------------->
             <div id="controls" class="bigsection" style="height: 625px;">
@@ -231,7 +254,7 @@ body{
                     </button>
                     <button onclick="clearTasks()">Clear</button>
                     <button onclick="copyToClipboard('Tasks')">Export</button>
-                    <button onclick="showImport()">Import</button>
+                    <button onclick="showImportDialog()">Import</button>
                 </div>
                 <div class="smallsection"> <!-- buttons bottom -->
                     <button onclick="delayTasks(10)">+10m</button>
@@ -246,11 +269,6 @@ body{
             </div>
             <div style='overflow: scroll;' class="bigsection">
                 <table id="taskslist"></table>
-            </div>
-            <div id="popupscreen">
-                <textarea id="importstr" style="font-size: 50px; max-width: 600px; min-width: 600px; margin-left: 50px; margin-top: 50px; min-height: 200px; max-height: 600px; height: 600px;"></textarea>
-                <button class="btn" onclick="pasteImport()">Import</button>
-                <button class="btn" onclick="showImport()">Close</button>
             </div>
         </div>
         <div id="container2"> <!--------------------------------------------------------------->
@@ -272,7 +290,7 @@ body{
                     </button>
                     <button onclick="clearTodosDialog()">Clear</button>
                     <button onclick="copyToClipboard('Todos')">Export</button>
-                    <button onclick="importTodos()">Import</button>
+                    <button onclick="showImportDialog()">Import</button>
                 </div>
                 <textarea id="importtodos"></textarea>
             </div>
@@ -297,6 +315,7 @@ body{
                     >Add
                 </button>
                 <button class="addbtn" onclick="copyToClipboard('Habits')">Export</button>
+                <button class="addbtn" onclick="showImportDialog()">Import</button>
             </div>
             <div id="habitstable" style='overflow: scroll;' class="bigsection">
                 <table id="habitslist"></table>
@@ -312,6 +331,9 @@ body{
     const b3 = document.getElementById("b3");
     const confirmdialog = document.getElementById("confirmdialog");
     const confirmyes = document.getElementById("confirmyes");
+    closeimport.addEventListener("click", ()=>{
+        document.getElementById("big-import-dialog").style.display = "none"
+    })
     let nextFreeTime;
     let startTimeChosen = false
     let listItemCount; // gets value with getTasks function
@@ -538,33 +560,6 @@ const copyToClipboard=(mode)=>{
     }
     messageAlert(mode + " copied to clipboard!")
 }
-const pasteImport=()=>{
-    try{
-        tasks = JSON.parse(importstr.value)
-        showImport()
-        updateStorage()
-        createList()
-        messageAlert("Successfully imported")
-    }
-    catch{
-        messageAlert("Syntax error", "rgba(119, 12, 12, 0.7)")
-    }
-}
-const showImport=()=>{
-    document.getElementById("importstr").focus()
-    importstr.value = ""
-    if(flags.dialogHidden){
-        sidebtn.style.display = "block"
-        popupscreen.style.display = "block"
-        flags.dialogHidden = false
-    }
-    else{
-        sidebtn.style.display = "none"
-        popupscreen.style.display = "none"
-        flags.dialogHidden = true
-    }
-  importstr.focus();
-}
 const delayTasks=(amount)=>{
     for(let i=0; i<tasks.length; i++){
         tasks[i].startTime += amount
@@ -742,33 +737,6 @@ const deleteTodo=(id, abort)=>{
     }
     deletionpopup.remove()
 }
-const importTodos=()=>{
-    if(flags.textareaShown){
-        if(importtodos.value.length > 0){
-            try{
-                todos = JSON.parse(importtodos.value)
-                updateStorage()
-                createTodos()
-                messageAlert("Imported successfully")
-                importtodos.style.display = "none"
-                flags.textareaShown = false;
-            }
-            catch{
-                messageAlert("Syntax error", "rgba(119, 12, 12, 0.7)")
-                
-            }
-        }
-        else{
-                importtodos.style.display = "none"
-                flags.textareaShown = false;
-        }
-    }else{
-        importtodos.style.display = "block"
-        importtodos.value = ""
-        flags.textareaShown = true;
-    }
-
-}
 const messageAlert=(text, color)=>{
     message.innerHTML = text
     message.style.animation = "none"
@@ -900,6 +868,29 @@ const discardDialog=()=>{
     habitstable.style.filter = "none"
     habitscontrols.style.filter = "none"
     confirmdialog.style.display = "none"
+}
+const importData=()=>{
+    try{
+        switch(currentView){
+            case 1:
+                tasks = JSON.parse(importtextfield.value); searchTask()
+                break;
+            case 2:
+                todos = JSON.parse(importtextfield.value); createTodos()
+                break;
+            case 3:
+                habits = JSON.parse(importtextfield.value), createHabits()
+                break;
+        }
+        updateStorage();
+        document.getElementById("big-import-dialog").style.display = "none"
+    }
+    catch{
+        messageAlert("Invalid JSON", "rgba(119, 12, 12, 0.7)")
+    }
+}
+const showImportDialog=()=>{
+    document.getElementById("big-import-dialog").style.display = "block"
 }
 
 createHabits();
