@@ -230,7 +230,7 @@ body{
                         >Add
                     </button>
                     <button onclick="clearTasks()">Clear</button>
-                    <button onclick="copyToClipboard()">Export</button>
+                    <button onclick="copyToClipboard('Tasks')">Export</button>
                     <button onclick="showImport()">Import</button>
                 </div>
                 <div class="smallsection"> <!-- buttons bottom -->
@@ -271,7 +271,7 @@ body{
                         >Add
                     </button>
                     <button onclick="clearTodosDialog()">Clear</button>
-                    <button onclick="copyTodos()">Export</button>
+                    <button onclick="copyToClipboard('Todos')">Export</button>
                     <button onclick="importTodos()">Import</button>
                 </div>
                 <textarea id="importtodos"></textarea>
@@ -296,6 +296,7 @@ body{
                     )"
                     >Add
                 </button>
+                <button class="addbtn" onclick="copyToClipboard('Habits')">Export</button>
             </div>
             <div id="habitstable" style='overflow: scroll;' class="bigsection">
                 <table id="habitslist"></table>
@@ -523,9 +524,19 @@ const hideControls=()=>{
         flags.controlsHidden = true
     }
 }
-const copyToClipboard=()=>{
-    navigator.clipboard.writeText(JSON.stringify(tasks))
-    messageAlert("Tasks copied to clipboard!")
+const copyToClipboard=(mode)=>{
+    switch(mode){
+        case "Tasks":
+            navigator.clipboard.writeText(JSON.stringify(tasks));
+            break;
+        case "Todos":
+            navigator.clipboard.writeText(JSON.stringify(todos));
+            break;
+        case "Habits":
+            navigator.clipboard.writeText(JSON.stringify(habits));
+            break;
+    }
+    messageAlert(mode + " copied to clipboard!")
 }
 const pasteImport=()=>{
     try{
@@ -685,10 +696,6 @@ const clearTodos=(abort)=>{
         updateStorage();
     }
     cleartodospopup.remove()
-}
-const copyTodos=()=>{
-    navigator.clipboard.writeText(JSON.stringify(todos))
-    messageAlert("Todos copied!")
 }
 const getTodos=()=>{
     if(localStorage.getItem("todos")!= null){
@@ -863,10 +870,10 @@ const createHabits=()=>{
                             ${timePassed}d
                         </td>
                         <td>
-                            <button onclick="confirmDialog(1, ${i})" style="width : 110px" class="addbtn">↻</button>
+                            <button onclick="confirmDialog(false, ${i})" style="width : 110px" class="addbtn">↻</button>
                         </td>
                         <td>
-                            <button onclick="confirmDialog(0, ${i})" style="width : 110px" class="addbtn">X</button>
+                            <button onclick="confirmDialog(true, ${i})" style="width : 110px" class="addbtn">X</button>
                         </td>
                     </tr>
                     `;
@@ -874,34 +881,19 @@ const createHabits=()=>{
         }
     }
 }
-const confirmDialog=(mode, index)=>{
+const confirmDialog=(deleteHabit, index)=>{
     let now = Math.floor((new Date().getTime())/86400000)
     habitscontrols.style.filter = "blur(10px)"
     habitstable.style.filter = "blur(10px)"
     confirmdialog.style.display = "block"
-    switch(mode){
-        case 0: // delete
-            habittodelete.innerHTML = "Delete " + habits[index].habitName + "?";
-            confirmyes.onclick=()=>{
-                habits[index] = null;
-                habitstable.style.filter = "none"
-                habitscontrols.style.filter = "none"
-                confirmdialog.style.display = "none"
-                createHabits();
-                updateStorage();
-            }
-            break;
-        case 1: // reset
-            habittodelete.innerHTML = "Reset " + habits[i].habitName + "?";
-            confirmyes.onclick=()=>{
-                habits[i].startDate = now;
-                habitstable.style.filter = "none"
-                habitscontrols.style.filter = "none"
-                confirmdialog.style.display = "none"
-                createHabits();
-                updateStorage();
-            }
-            break;
+    habittodelete.innerHTML = (deleteHabit ? "Delete " : "Reset ") + habits[index].habitName + "?";
+    confirmyes.onclick=()=>{
+        deleteHabit ? habits[index] = null : habits[index].startDate = now;
+        habitstable.style.filter = "none"
+        habitscontrols.style.filter = "none"
+        confirmdialog.style.display = "none"
+        createHabits();
+        updateStorage();
     }
 }
 const discardDialog=()=>{
