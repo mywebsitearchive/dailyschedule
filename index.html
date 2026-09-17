@@ -211,6 +211,8 @@ body{
     margin: 5%;
     height: 200px;
     border-radius: 20px;
+} #cleartodospopup{
+    display: none;
 }
     </style>
 </head>
@@ -272,6 +274,18 @@ body{
             </div>
         </div>
         <div id="container2"> <!--------------------------------------------------------------->
+            <div id="cleartodospopup" class="dialogi">Clear ToDos? You can still access them from your clipboard.<br>
+                <button
+                    onclick="clearTodos(false)"
+                    >
+                    Sure.
+                </button>
+                <button
+                    onclick="clearTodos(true)"
+                    >
+                    Nah.
+                </button>
+            </div>
             <div id="controls" class="bigsection" style="height: 625px;">
                 <div class="smallsection"> <!-- name -->
                     <p>Name:</p>
@@ -670,18 +684,7 @@ const createTodos=()=>{
 }
 const clearTodosDialog=()=>{
     navigator.clipboard.writeText(JSON.stringify(todos))
-    document.body.innerHTML += `<div id="cleartodospopup" class="dialogi">Clear ToDos? You can still access them from your clipboard.<br>
-                                    <button
-                                        onclick="clearTodos(false)"
-                                        >
-                                        Sure.
-                                    </button>
-                                    <button
-                                        onclick="clearTodos(true)"
-                                        >
-                                        Nah.
-                                    </button>
-                                </div>`
+    cleartodospopup.style.display = "block"
 }
 const clearTodos=(abort)=>{
     if(!abort){
@@ -690,7 +693,7 @@ const clearTodos=(abort)=>{
         messageAlert("Todos cleared!")
         updateStorage();
     }
-    cleartodospopup.remove()
+    cleartodospopup.style.display = "none"
 }
 const getTodos=()=>{
     if(localStorage.getItem("todos")!= null){
@@ -870,23 +873,28 @@ const discardDialog=()=>{
     confirmdialog.style.display = "none"
 }
 const importData=()=>{
-    try{
-        switch(currentView){
-            case 1:
-                tasks = JSON.parse(importtextfield.value); searchTask()
-                break;
-            case 2:
-                todos = JSON.parse(importtextfield.value); createTodos()
-                break;
-            case 3:
-                habits = JSON.parse(importtextfield.value), createHabits()
-                break;
-        }
-        updateStorage();
-        document.getElementById("big-import-dialog").style.display = "none"
+    if(importtextfield.value == "[]"){
+        messageAlert("Empty array", "rgba(119, 12, 12, 0.7)")
     }
-    catch{
-        messageAlert("Invalid JSON", "rgba(119, 12, 12, 0.7)")
+    else{
+        try{
+            switch(currentView){
+                case 1:
+                    tasks = JSON.parse(importtextfield.value); searchTask()
+                    break;
+                case 2:
+                    todos = JSON.parse(importtextfield.value); createTodos()
+                    break;
+                case 3:
+                    habits = JSON.parse(importtextfield.value), createHabits()
+                    break;
+            }
+            updateStorage();
+            document.getElementById("big-import-dialog").style.display = "none"
+        }
+        catch{
+            messageAlert("Invalid JSON", "rgba(119, 12, 12, 0.7)")
+        }
     }
 }
 const showImportDialog=()=>{
