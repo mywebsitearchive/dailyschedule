@@ -148,6 +148,7 @@ body{
         left: 50px;
         top: -500px;
 } .dialogi{
+        display: none;
         background-color: rgb(12, 119, 12);
         padding: 30px;
         border-radius: 20px;
@@ -211,8 +212,6 @@ body{
     margin: 5%;
     height: 200px;
     border-radius: 20px;
-} #cleartodospopup{
-    display: none;
 }
     </style>
 </head>
@@ -283,6 +282,24 @@ body{
                 <button
                     onclick="clearTodos(true)"
                     >
+                    Nah.
+                </button>
+            </div>
+            <div id="deletionpopup" class="dialogi">
+                <p style="margin-left: 20px;" id="deletionprompt"></p>
+                <button id="deletetodo">
+                    Sure.
+                </button>
+                <button id="keeptodo">
+                    Nah.
+                </button>
+            </div>
+            <div id="completionpopup" class="dialogi">
+                <p style="margin-left: 20px;" id="completionprompt"></p>
+                <button id="resettodo">
+                    Sure.
+                </button>
+                <button id="dontreset">
                     Nah.
                 </button>
             </div>
@@ -709,27 +726,25 @@ const chooseView=()=>{
     }
 }
 const deletionDialog=(id)=>{
-    let taskToDelete = "";
-    for(let i in todos){
-        if(todos[i].id == id){
-            taskToDelete = todos[i].todoName
+    if(deletionprompt.innerHTML.length + completionprompt.innerHTML.length == 0){
+        let taskToDelete = "";
+        for(let i in todos){
+            if(todos[i].id == id){
+                taskToDelete = todos[i].todoName
+            }
         }
+        if(taskToDelete.length > 13){
+            taskToDelete = taskToDelete.substring(0,12)+"..."
+        }
+        deletionprompt.innerHTML = "Delete " + taskToDelete + "?"
+        deletionpopup.style.display = "block"
+        deletetodo.addEventListener("click", ()=>{
+            deleteTodo(id, false);
+        })
+        keeptodo.addEventListener("click", ()=>{
+            deleteTodo(id, true);
+        })
     }
-    if(taskToDelete.length > 13){
-        taskToDelete = taskToDelete.substring(0,12)+"..."
-    }
-    document.body.innerHTML += `<div id="deletionpopup" class="dialogi">Delete ${taskToDelete}?<br>
-                                    <button
-                                        onclick="deleteTodo(${id}, false)"
-                                        >
-                                        Sure.
-                                    </button>
-                                    <button
-                                        onclick="deleteTodo(${id}, true)"
-                                        >
-                                        Nah.
-                                    </button>
-                                </div>`
 }
 const deleteTodo=(id, abort)=>{
     if(!abort){
@@ -738,7 +753,8 @@ const deleteTodo=(id, abort)=>{
         updateStorage()
         messageAlert("Task deleted")
     }
-    deletionpopup.remove()
+    deletionpopup.style.display = "none";
+    deletionprompt.innerHTML = "";
 }
 const messageAlert=(text, color)=>{
     message.innerHTML = text
@@ -748,27 +764,25 @@ const messageAlert=(text, color)=>{
     message.style.backgroundColor = typeof color == "undefined"? "rgb(12, 119, 12, 0.7)" : color
 }
 const resetTodoDialog=(id)=>{
-    let taskToReset = "";
-    for(let i in todos){
-        if(todos[i].id == id){
-            taskToReset = todos[i].todoName
+    if(deletionprompt.innerHTML.length + completionprompt.innerHTML.length == 0){
+        let taskToReset = "";
+        for(let i in todos){
+            if(todos[i].id == id){
+                taskToReset = todos[i].todoName
+            }
         }
+        if(taskToReset.length > 13){
+            taskToReset = taskToReset.substring(0,12)+"..."
+        }
+        completionprompt.innerHTML = "Reset " + taskToReset + "?"
+        completionpopup.style.display = "block"
+        resettodo.addEventListener("click", ()=>{
+            resetTodo(id, false);
+        })
+        dontreset.addEventListener("click", ()=>{
+            resetTodo(id, true);
+        })
     }
-    if(taskToReset.length > 13){
-        taskToReset = taskToReset.substring(0,12)+"..."
-    }
-    document.body.innerHTML += `<div id="completionpopup" class="dialogi">Complete ${taskToReset}?<br>
-                                    <button
-                                        onclick="resetTodo(${id}, false)"
-                                        >
-                                        Sure.
-                                    </button>
-                                    <button
-                                        onclick="resetTodo(${id}, true)"
-                                        >
-                                        Nah.
-                                    </button>
-                                </div>`
 }
 const resetTodo=(id,abort)=>{
     if(!abort){
@@ -783,7 +797,8 @@ const resetTodo=(id,abort)=>{
             }
         }
     }
-    completionpopup.remove()
+    completionpopup.style.display = "none";
+    completionprompt.innerHTML = "";
 }
 const addHabit=(name)=>{
     let now = Math.floor((new Date().getTime())/86400000)
