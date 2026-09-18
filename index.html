@@ -83,7 +83,7 @@ body{
         border-radius: 30px;
         font-size: 50px;
 } .bigsection{
-        height: 500px;
+        margin-bottom: 30px;
         width: 900px;
         float: left;
 } .smallsection{
@@ -303,7 +303,7 @@ body{
                     Nah.
                 </button>
             </div>
-            <div id="controls" class="bigsection" style="height: 625px;">
+            <div id="controls" class="bigsection">
                 <div class="smallsection"> <!-- name -->
                     <p>Name:</p>
                     <input id="todonameinput">
@@ -323,6 +323,7 @@ body{
                     <button onclick="copyToClipboard('Todos')">Export</button>
                     <button onclick="showImportDialog()">Import</button>
                 </div>
+                <div id="streakinfo" class="smallsection" style="font-size: 50px;"> <!-- streak --></div>
                 <textarea id="importtodos"></textarea>
             </div>
             <div style='overflow: scroll; height:900px;' class="bigsection">
@@ -335,7 +336,7 @@ body{
                 <button id="confirmyes" class="addbtn">Yes</button>
                 <button onclick="discardDialog()" class="addbtn">No</button>
             </div>
-            <div id="habitscontrols" class="bigsection" style="height: 300px;">
+            <div id="habitscontrols" class="bigsection">
                 <div class="smallsection"> <!-- name -->
                     <p>Name:</p>
                     <input id="habitnameinput">
@@ -640,7 +641,7 @@ const changeView=(view)=>{
     currentView = view;
 }
 const addToDo=(name, days)=>{
-    let now = Math.floor((new Date().getTime())/86400000)
+    const now = Math.floor((new Date().getTime())/86400000)
     let idArray = []
     if(todos.length > 0){
         for(let i in todos){
@@ -671,7 +672,7 @@ const addToDo=(name, days)=>{
 }
 const createTodos=()=>{
     if(JSON.stringify(todos) != "[]" && JSON.stringify(todos) != "null"){
-        let now = Math.floor((new Date().getTime())/86400000);
+        const now = Math.floor((new Date().getTime())/86400000);
         todos = todos.sort((a,b)=>b.lengthDays-a.lengthDays).sort((a,b)=>a.endDate-b.endDate)
         todoslist.innerHTML = ""
         for(let i = 0; i < todos.length; i++){
@@ -786,7 +787,7 @@ const resetTodoDialog=(id)=>{
 }
 const resetTodo=(id,abort)=>{
     if(!abort){
-        let now = Math.floor((new Date().getTime())/86400000)
+        const now = Math.floor((new Date().getTime())/86400000)
         for(let i in todos){
             if(todos[i].id == id){
                 todos[i].endDate = now + todos[i].lengthDays;
@@ -801,7 +802,7 @@ const resetTodo=(id,abort)=>{
     completionprompt.innerHTML = "";
 }
 const addHabit=(name)=>{
-    let now = Math.floor((new Date().getTime())/86400000)
+    const now = Math.floor((new Date().getTime())/86400000)
     let idArray = [] // array of id's created in order to find the largest id number
     let nulls = 0;
     if(JSON.stringify(habits) == "[]" || habits == null){
@@ -838,7 +839,7 @@ const addHabit=(name)=>{
     updateStorage()
 }
 const createHabits=()=>{
-    let now = Math.floor((new Date().getTime())/86400000)
+    const now = Math.floor((new Date().getTime())/86400000)
     habitslist.innerHTML = "";
     if(JSON.stringify(habits) == "[]"){ // on page load,
         habits = JSON.parse(localStorage.getItem("habits"))
@@ -868,7 +869,7 @@ const createHabits=()=>{
     }
 }
 const confirmDialog=(deleteHabit, index)=>{
-    let now = Math.floor((new Date().getTime())/86400000)
+    const now = Math.floor((new Date().getTime())/86400000)
     habitscontrols.style.filter = "blur(10px)"
     habitstable.style.filter = "blur(10px)"
     confirmdialog.style.display = "block"
@@ -915,12 +916,42 @@ const importData=()=>{
 const showImportDialog=()=>{
     document.getElementById("big-import-dialog").style.display = "block"
 }
-
+const showStreak=()=>{
+    const now = Math.floor((new Date().getTime())/86400000);
+    let streak = localStorage.getItem("streak");
+    if(streak == null){
+        streak = 0;
+    }
+    let streakEnded = false;
+    const lastVisited = localStorage.getItem("lastVisited");
+    if(lastVisited != null){
+        for(i in todos){
+            if(Number(todos[i].endDate) < now){ // task deadline before today
+                streakEnded = true;
+            };
+        };
+        if(streakEnded){
+            streak = 0;
+        }
+        else{
+            streak = Number(streak) + now - lastVisited;
+        };
+    };
+    localStorage.setItem("lastVisited", now);
+    localStorage.setItem("streak", streak);
+    let longestStreak = localStorage.getItem("longestStreak");
+    if(longestStreak == null || Number(longestStreak) < streak){
+        longestStreak = streak;
+        localStorage.setItem("longestStreak", streak);
+    };
+    streakinfo.innerHTML = `Streak: ${streak} days (Best: ${longestStreak} days)`
+}
 createHabits();
 getTodos();
 searchTask();
 updateStorage(); // add empty array to storage if no tasks added
 chooseView();
+showStreak();
 </script>
 </body>
 </html>
