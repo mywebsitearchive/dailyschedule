@@ -76,8 +76,9 @@ body{
         height: 125px;
         width: 100%;
 } table{
-        border: 5px white solid;
-        width: 890px;
+    border: 5px white solid;
+    width: 890px;
+    border-collapse: collapse;
 } #hidebtn{
         position: absolute;
         right: 100px;
@@ -155,7 +156,6 @@ body{
         border-radius: 30px;
         font-size: 50px;
 } #todoslist {
-    border-collapse: collapse;
     font-size: 40px;
 } #importtodos{
     min-width: 800px;
@@ -255,7 +255,9 @@ body{
                 <div id="clockscreen" class="bigsection"></div>
             </div>
             <div style='overflow: scroll;' class="bigsection">
-                <table id="taskslist"></table>
+                <table>
+                    <tbody id="taskslist"></tbody>
+                </table>
             </div>
         </div>
         <div id="container2" class="container"> <!--------------------------------------------------------------->
@@ -313,7 +315,9 @@ body{
                 <textarea id="importtodos"></textarea>
             </div>
             <div style='overflow: scroll; height:900px;' class="bigsection">
-                <table id="todoslist"></table>
+                <table>
+                    <tbody id="todoslist"></tbody>
+                </table>
             </div>
         </div>
         <div id="container3" class="container"> <!--------------------------------------------------------------->
@@ -674,7 +678,7 @@ const createTodos=()=>{
                 toDo = toDo.substring(0,11)+"..."
             }
             todoslist.innerHTML += `<tr style="background-color:${bgColor};">
-                                        <td title="${todos[i].todoName}">${toDo} <i></i></td>
+                                        <td title="${todos[i].todoName}">${toDo}</td>
                                         <td style="color:rgb(192, 192, 192); font-size:30px">(${Math.round(todos[i].lengthDays)}d)</td>
                                         <td>${Math.round(toGo)}d</td>
                                         <td><button style="width:80px" onclick="resetTodoDialog(${todos[i].id})"">✓</button></td>
