@@ -717,6 +717,7 @@ const chooseView=()=>{
     }
 }
 const deletionDialog=(id)=>{
+    window.scroll({top : 0, left : 0, behavior : "smooth"})
     if(deletionprompt.innerHTML.length + completionprompt.innerHTML.length == 0){
         let taskToDelete = "";
         for(let i in todos){
@@ -755,6 +756,7 @@ const messageAlert=(text, color)=>{
     message.style.backgroundColor = typeof color == "undefined"? "rgb(12, 119, 12, 0.7)" : color
 }
 const resetTodoDialog=(id)=>{
+    window.scroll({top : 0, left : 0, behavior : "smooth"})
     if(deletionprompt.innerHTML.length + completionprompt.innerHTML.length == 0){
         let taskToReset = "";
         for(let i in todos){
@@ -765,7 +767,7 @@ const resetTodoDialog=(id)=>{
         if(taskToReset.length > 13){
             taskToReset = taskToReset.substring(0,12)+"..."
         }
-        completionprompt.innerHTML = "Reset " + taskToReset + "?"
+        completionprompt.innerHTML = "Complete " + taskToReset + "?"
         completionpopup.style.display = "block"
         resettodo.addEventListener("click", ()=>{
             resetTodo(id, false);
