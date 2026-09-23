@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
+    <title>Discipline Tracker</title>
     <meta charset="utf-8">
         <link 
         rel="icon" 
@@ -55,7 +56,7 @@ body{
     float: left;
     text-align: right;
     line-height: 100px;
-} #controls p{
+} #controls p, #controls2 p{
         width: 250px;
         height: 100px;
         margin-right: 0;
@@ -214,7 +215,7 @@ body{
                 <button id="importdata" onclick="importData()" style="margin-left: 5%;" class="addbtn">Import</button>
                 <button id="closeimport" style="margin-left: 5%;" class="addbtn">Close</button>
             </div>
-        <div id="container" class="container"> <!--------------------------------------------------------------->
+        <div id="container" class="container"> 
             <div id="controls" class="bigsection" style="height: 625px;">
                 <div class="smallsection"> <!-- time -->
                     <p>Time:</p>
@@ -260,7 +261,7 @@ body{
                 </table>
             </div>
         </div>
-        <div id="container2" class="container"> <!--------------------------------------------------------------->
+        <div id="container2" class="container"> 
             <div id="cleartodospopup" class="dialogi">Clear ToDos? You can still access them from your clipboard.<br>
                 <button
                     onclick="clearTodos(false)"
@@ -291,14 +292,14 @@ body{
                     Nah.
                 </button>
             </div>
-            <div id="controls" class="bigsection">
+            <div id="controls2" class="bigsection">
                 <div class="smallsection"> <!-- name -->
                     <p>Name:</p>
                     <input id="todonameinput">
                 </div>
                 <div class="smallsection"> <!-- name -->
                     <p title="How often to do it">Days:</p>
-                    <input size="60px" id="daysinput">
+                    <input id="daysinput">
                 </div>
                 <div class="smallsection"> <!-- buttons top -->
                     <button onclick="addToDo(
@@ -320,7 +321,7 @@ body{
                 </table>
             </div>
         </div>
-        <div id="container3" class="container"> <!--------------------------------------------------------------->
+        <div id="container3" class="container"> 
             <div id="confirmdialog">
                 <div style="width: 800px;" id="habittodelete"></div>
                 <button id="confirmyes" class="addbtn">Yes</button>
